@@ -8,4 +8,4 @@
 
 # COMMAND ----------
 
-# MAGIC %run "1. Setup (Recipient)"
+# MAGIC %run "./1. Setup (Recipient)"

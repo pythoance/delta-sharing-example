@@ -8,11 +8,11 @@
 # COMMAND ----------
 
 # Install the python delta sharing connector. This connector allows the loading of data using the alternative ways. It also allows for listing all available schemas and tables when using the SharingClient. 
-# %pip install delta-sharing
-# import delta_sharing
+%pip install delta-sharing
 
 # COMMAND ----------
 
+import delta_sharing
 from pyspark.sql import Window
 from pyspark.sql.functions import rank, col, when
 
@@ -20,19 +20,19 @@ from pyspark.sql.functions import rank, col, when
 
 # Declare the location of the profile file that you downloaded from the activation link that was provided by the share granter
 
-file = "settings.share"
+file = "config.share"
 profile_file = "/dbfs/FileStore/keys/" + file
 
 # COMMAND ----------
 
 # List all the available tables
 
-# client = delta_sharing.SharingClient(profile_file)
-# print("Tables:")
-# for share in client.list_shares():
-#     for schema in client.list_schemas(share):
-#         for table in client.list_tables(schema):
-#             print(f"{share}.{schema}.{table}")
+client = delta_sharing.SharingClient(profile_file)
+print("Tables:")
+for share in client.list_shares():
+    for schema in client.list_schemas(share):
+        for table in client.list_tables(schema):
+            print(f"  - {share.name}.{schema.name}.{table.name}")
 
 # COMMAND ----------
 
@@ -44,19 +44,14 @@ table_url = "dbfs:/FileStore/keys/" + file + "#example_share.default.example_tab
 
 # Display the first 5 changes as an example of how the CDF table looks
 
-spark.read\
-    .format("deltaSharing")\
-    .option("readChangeFeed", "true")\
-    .option("startingVersion", 0)\
-    .load(table_url)\
-    .show(5, True)
+delta_sharing.load_table_changes_as_spark(url=table_url, starting_version= 0).show(5)
 
 # COMMAND ----------
 
-# Read the changes that have been made
-# Exclude changes older than the latest changes that were read
-# Exclude update_preimage changes as they just show the old values, before an update happened
-# Include only the latest change for a row
+# Read the changes that have been made. From the read changes, some are excluded:
+#   - versions older than the latest recorded version in our local table. the newest recorded one will be reprocessed for continuity
+#   - update_preimage changes because they just show the previous value in case of a row update
+#   - old versions of a row because only the latest version matters
 
 windowSpec = Window.partitionBy("origin").orderBy("_commit_version")
 latest_version = spark.sql("""
@@ -65,11 +60,7 @@ latest_version = spark.sql("""
     LIMIT 1
 """).collect()[0][0]
 
-changes = spark.read\
-    .format("deltaSharing")\
-    .option("readChangeFeed", "true")\
-    .option("startingVersion", latest_version)\
-    .load(table_url)\
+changes = delta_sharing.load_table_changes_as_spark(url=table_url, starting_version=latest_version)\
     .where("_change_type <> 'update_preimage'")\
     .withColumn("_change_type", when(col("_change_type") == "update_postimage", "update").otherwise(col("_change_type")))\
     .withColumn("rank", rank().over(windowSpec))\
@@ -81,12 +72,7 @@ changes.createOrReplaceTempView("recipient_example_changes")
 # Display the changes
 display(changes)
 
-# COMMAND ----------
-
-# Alternative way to read the change data feed using the delta-sharing connector
-# data = delta_sharing.load_table_changes_as_spark(table_url)
-
-# Alternative way to read the change data feed using the delta-sharing connector to Pandas
+# To read the change data feed as pandas DataFrames use:
 # data = delta_sharing.load_table_changes_as_pandas(table_url)
 
 # COMMAND ----------

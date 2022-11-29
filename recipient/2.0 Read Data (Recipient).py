@@ -7,27 +7,30 @@
 
 # COMMAND ----------
 
-# Install the python delta sharing connector. This connector allows the loading of data using the alternative ways. It also allows for listing all available schemas and tables when using the SharingClient. 
+# Install the python delta sharing connector. This connector allows the loading of data as spark DataFrames or pandas DataFrames. It also allows for listing of all available schemas and tables.
 # %pip install delta-sharing
-# import delta_sharing
+
+# COMMAND ----------
+
+import delta_sharing
 
 # COMMAND ----------
 
 # Declare the location of the profile file that you downloaded from the activation link that was provided by the share granter
 
-file = "settings.share"
+file = "config.share"
 profile_file = "/dbfs/FileStore/keys/" + file
 
 # COMMAND ----------
 
 # List all the available tables
 
-# client = delta_sharing.SharingClient(profile_file)
-# print("Tables:")
-# for share in client.list_shares():
-#     for schema in client.list_schemas(share):
-#         for table in client.list_tables(schema):
-#             print(f"{share}.{schema}.{table}")
+client = delta_sharing.SharingClient(profile_file)
+print("Tables:")
+for share in client.list_shares():
+    for schema in client.list_schemas(share):
+        for table in client.list_tables(schema):
+            print(f"  - {share.name}.{schema.name}.{table.name}")
 
 # COMMAND ----------
 
@@ -39,16 +42,9 @@ table_url = "dbfs:/FileStore/keys/" + file + "#example_share.default.example_tab
 
 # Read the data with all the changes applied
 
-data = spark.read\
-    .format("deltaSharing")\
-    .load(table_url)
+data = delta_sharing.load_as_spark(table_url)
 
-# COMMAND ----------
-
-# Alternative way to read the data using the delta-sharing connector
-# data = delta_sharing.load_as_spark(table_url)
-
-# Alternative way to read the data using the delta-sharing connector to Pandas
+# To read the data as pandas DataFrames use:
 # data = delta_sharing.load_as_pandas(table_url)
 
 # COMMAND ----------

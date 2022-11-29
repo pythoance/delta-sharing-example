@@ -19,4 +19,4 @@ dbutils.fs.rm("dbfs:/tmp/delta/flight_data/", True)
 
 # COMMAND ----------
 
-# MAGIC %run "1. Setup (Sender)"
+# MAGIC %run "./1. Setup (Sender)"
