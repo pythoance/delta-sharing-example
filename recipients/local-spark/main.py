@@ -98,7 +98,6 @@ def apply_changes(source_table_name, target_table_name):
 
 
 def start():
-    print("HELLO WORLD")
     table_url = profile_file + "#example_share.default.example_table"
     local_table_name = "recipient_example"
     local_changes_table_name = "recipient_example_changes"
