@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "local-pandas"
+version = "0.1.0"
+description = ""
+authors = ["Q"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^1.5.2"
+delta-sharing = "^0.6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
