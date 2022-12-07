@@ -53,7 +53,7 @@ delta_sharing.load_table_changes_as_spark(url=table_url, starting_version= 0).sh
 #  - update_preimage changes because they just show the previous value in case of a row update
 #  - old changes of a row if there are multiple because only the latest change matters
 
-windowSpec = Window.partitionBy("origin").orderBy("commit_version")
+window_spec = Window.partitionBy("origin").orderBy("commit_version")
 latest_version = spark.sql("""
     SELECT coalesce(max(latest_version) ,0)
     FROM main.default.recipient_example
