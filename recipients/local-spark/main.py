@@ -65,6 +65,12 @@ def read_changes(source_table_name, table_url, starting_version=0):
 
     window_spec = Window.partitionBy("origin").orderBy("commit_version")
 
+    # Read Changes and rename columns.
+    # Remove rows with the change type update_preimage as they are not needed.
+    # Rename the update_postimage change type to update.
+    # Rank changes so that the newest changes for a row have the lowest rank.
+    # Take only the latest version of the changes for each row and drop the ranking column.
+    # Save the changes to a local delta table.
     delta_sharing.load_table_changes_as_spark(url=table_url, starting_version=starting_version) \
         .withColumnRenamed("_commit_version", "commit_version") \
         .withColumnRenamed("_commit_timestamp", "commit_timestamp") \
@@ -84,7 +90,7 @@ def apply_changes(source_table_name, target_table_name):
     """
     Apply the changes of a table into a local delta table.
     :param source_table_name: The name of the delta table that contains the changes.
-    :param target_table_name: The name of the delta table where the changes will be merged.
+    :param target_table_name: The name of the delta table where the changes will be applied.
     """
     # TO NOTE: The merge operation only works on delta tables!
     spark.sql(f"""
