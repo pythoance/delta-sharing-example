@@ -43,7 +43,7 @@ def get_max(table_name, column_name, default_value=0):
     :param table_name: The name of the table in which to look.
     :param column_name: The name of the column in which to look.
     :param default_value: The default value in case no value is found.
-    :return: The highest version from a column from a table.
+    :return: The highest value from a column from a table.
     """
     return spark.sql(f"""
         SELECT coalesce(max({column_name}), {default_value})
