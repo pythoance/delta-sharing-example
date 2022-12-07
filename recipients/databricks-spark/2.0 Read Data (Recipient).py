@@ -1,14 +1,14 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC 
-# MAGIC **This notebook reads data from a delta table shared with them using delta open share and it overwrites a local delta table with the new data.**
+# MAGIC **This notebook reads data from a delta table shared using delta open share and it overwrites a local delta table with the new data.**
 # MAGIC 
-# MAGIC To Note: This notebook will have to be ran every time the updated data is needed as the deltaSharing format does not support streamed reading for continuous data reading
+# MAGIC To Note: This notebook needs to be ran every time the updated data is needed as the deltaSharing format does not support continuous data reading.
 
 # COMMAND ----------
 
 # Install the python delta sharing connector. This connector allows the loading of data as spark DataFrames or pandas DataFrames. It also allows for listing of all available schemas and tables.
-# %pip install delta-sharing
+%pip install delta-sharing
 
 # COMMAND ----------
 

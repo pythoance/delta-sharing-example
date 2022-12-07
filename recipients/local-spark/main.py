@@ -55,7 +55,7 @@ def get_max(table_name, column_name, default_value=0):
 def read_changes(source_table_name, table_url, starting_version=0):
     """
     Read the changes that have been made to a remote shared table and put them in a local delta table but exclude:
-     - versions older than the latest recorded version in our local table. the newest recorded one will be reprocessed for continuity
+     - versions older than the latest recorded version in our local table. the newest recorded version will be reprocessed for continuity
      - update_preimage changes because they just show the previous value in case of a row update
      - old changes of a row if there are multiple because only the latest change matters
     :param source_table_name: The name of the table where the changes will be placed.
